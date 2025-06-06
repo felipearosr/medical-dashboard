@@ -6,19 +6,19 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Pill, 
-  Users, 
-  UserCog, 
+import {
+  LayoutDashboard,
+  FileText,
+  Pill,
+  Users,
+  UserCog,
   BarChart3,
   Menu,
-  X,
   LogOut,
   Settings,
   Bell,
-  Search
+  Search,
+  Hospital,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,281 +29,147 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
-interface SidebarNavigationProps {
-  // Keeping this interface for the exported SidebarNavigation, if it's used elsewhere.
-  // If SidebarNavigation is not used, this can be removed.
-  activeTab?: string;
-  onTabChange?: (tab: string) => void;
-}
+const navItems = [
+  { href: '/dashboard/overview', label: 'Overview', icon: LayoutDashboard },
+  { href: '/dashboard/documents', label: 'Documentos', icon: FileText },
+  { href: '/dashboard/prestaciones', label: 'Prestaciones', icon: Pill },
+  { href: '/dashboard/patients', label: 'Pacientes', icon: Users },
+  { href: '/dashboard/doctors', label: 'Médicos', icon: UserCog },
+  { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
+];
 
-export function Navigation() {
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [searchOpen, setSearchOpen] = React.useState(false);
+function NavContent() {
   const pathname = usePathname();
-
-  const navItems = [
-    { id: 'overview', href: '/dashboard/overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'documents', href: '/dashboard/documents', label: 'Documentos', icon: FileText },
-    { id: 'prestaciones', href: '/dashboard/prestaciones', label: 'Prestaciones', icon: Pill },
-    { id: 'patients', href: '/dashboard/patients', label: 'Pacientes', icon: Users },
-    { id: 'doctors', href: '/dashboard/doctors', label: 'Médicos', icon: UserCog },
-    { id: 'analytics', href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
-  ];
-
   return (
-    <>
-      {/* Desktop Navigation */}
-      <nav className="hidden lg:flex items-center justify-between bg-white border-b px-6 py-3">
-        <div className="flex items-center gap-6">
-          {/* Logo/Brand */}
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🏥</span>
-            <span className="font-semibold text-lg">MedDash</span>
-          </div>
-
-          {/* Nav Items */}
-          <div className="flex items-center gap-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              
-              return (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all',
-                    isActive
-                      ? 'bg-[#667eea] text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  )}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Right side actions */}
-        <div className="flex items-center gap-4">
-          {/* Search */}
-          <div className="relative">
-            {searchOpen ? (
-              <div className="flex items-center gap-2">
-                <Input
-                  type="search"
-                  placeholder="Buscar documentos, pacientes..."
-                  className="w-64"
-                  autoFocus
-                  onBlur={() => setTimeout(() => setSearchOpen(false), 200)}
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSearchOpen(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            ) : (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSearchOpen(true)}
-              >
-                <Search className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-
-          {/* Notifications */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="w-4 h-4" />
-                <Badge 
-                  className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center"
-                  variant="destructive"
-                >
-                  3
-                </Badge>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>Notificaciones</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <div className="flex flex-col gap-1">
-                  <span className="font-medium">5 documentos con errores</span>
-                  <span className="text-sm text-gray-500">Hace 10 minutos</span>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <div className="flex flex-col gap-1">
-                  <span className="font-medium">Nuevo médico registrado</span>
-                  <span className="text-sm text-gray-500">Hace 1 hora</span>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <div className="flex flex-col gap-1">
-                  <span className="font-medium">Backup completado</span>
-                  <span className="text-sm text-gray-500">Hace 2 horas</span>
-                </div>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* User Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="/avatars/user.jpg" />
-                  <AvatarFallback>AD</AvatarFallback>
-                </Avatar>
-                <span className="hidden xl:inline-block">Admin</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Settings className="w-4 h-4 mr-2" />
-                Configuración
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <LogOut className="w-4 h-4 mr-2" />
-                Cerrar Sesión
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </nav>
-
-      {/* Mobile Navigation */}
-      <nav className="lg:hidden bg-white border-b">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🏥</span>
-            <span className="font-semibold">MedDash</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon">
-              <Search className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5" />
-              <Badge 
-                className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs"
-                variant="destructive"
-              >
-                3
-              </Badge>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </Button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="px-4 py-2 border-t">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              
-              return (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    'flex items-center gap-3 w-full px-4 py-3 rounded-lg font-medium transition-all',
-                    isActive
-                      ? 'bg-[#667eea] text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  )}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-            
-            <div className="border-t mt-2 pt-2">
-              <button className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100">
-                <Settings className="w-5 h-5" />
-                <span>Configuración</span>
-              </button>
-              <button className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100">
-                <LogOut className="w-5 h-5" />
-                <span>Cerrar Sesión</span>
-              </button>
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Breadcrumb */}
-      <div className="bg-gray-50 px-6 py-2 text-sm">
-        <div className="flex items-center gap-2 text-gray-600">
-          <span>Dashboard</span>
-          <span>/</span>
-          <span className="text-gray-900 font-medium">
-            {navItems.find(item => item.href === pathname)?.label || 'Overview'}
-          </span>
-        </div>
-      </div>
-    </>
+    <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+      {navItems.map(({ href, label, icon: Icon }) => (
+        <Link
+          key={label}
+          href={href}
+          className={cn(
+            'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+            pathname === href && 'bg-muted text-primary'
+          )}
+        >
+          <Icon className="h-4 w-4" />
+          {label}
+        </Link>
+      ))}
+    </nav>
   );
 }
 
-// Simplified Sidebar Navigation
-export function SidebarNavigation({ activeTab = 'overview', onTabChange }: SidebarNavigationProps) {
+function MobileNav() {
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Toggle navigation menu</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="flex flex-col">
+        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+          <Link href="/" className="flex items-center gap-2 font-semibold">
+            <Hospital className="h-6 w-6" />
+            <span>MedDash</span>
+          </Link>
+          <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
+            <Bell className="h-4 w-4" />
+            <span className="sr-only">Toggle notifications</span>
+          </Button>
+        </div>
+        <div className="flex-1 overflow-auto py-2">
+          <NavContent />
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function UserMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="secondary" size="icon" className="rounded-full">
+          <Avatar>
+            <AvatarFallback>A</AvatarFallback>
+          </Avatar>
+          <span className="sr-only">Toggle user menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>
+          <Settings className="mr-2 h-4 w-4" />
+          <span>Settings</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Logout</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function AppBreadcrumb() {
   const pathname = usePathname();
-  const navItems = [
-    { id: 'overview', href: '/dashboard/overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'documents', href: '/dashboard/documents', label: 'Documentos', icon: FileText },
-    { id: 'prestaciones', href: '/dashboard/prestaciones', label: 'Prestaciones', icon: Pill },
-    { id: 'patients', href: '/dashboard/patients', label: 'Pacientes', icon: Users },
-    { id: 'doctors', href: '/dashboard/doctors', label: 'Médicos', icon: UserCog },
-    { id: 'analytics', href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
-  ];
+  const segments = pathname.split('/').filter(Boolean);
 
   return (
-    <div className="flex flex-col gap-2">
-      {navItems.map((item) => {
-        const Icon = item.icon;
-        const isActive = pathname === item.href;
+    <Breadcrumb className="hidden md:flex">
+      <BreadcrumbList>
+        {segments.map((segment, index) => {
+          const href = `/${segments.slice(0, index + 1).join('/')}`;
+          const isLast = index === segments.length - 1;
+          return (
+            <React.Fragment key={href}>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href={href}>
+                    {segment.charAt(0).toUpperCase() + segment.slice(1)}
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              {!isLast && <BreadcrumbSeparator />}
+            </React.Fragment>
+          );
+        })}
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+}
 
-        return (
-          <Link
-            key={item.id}
-            href={item.href}
-            className={cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-all',
-              isActive
-                ? 'bg-purple-100 text-[#667eea]'
-                : 'text-gray-700 hover:bg-gray-100'
-            )}
-          >
-            <Icon className="w-5 h-5" />
-            <span>{item.label}</span>
-          </Link>
-        );
-      })}
-    </div>
+export function Navigation() {
+  return (
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+       <div className="hidden lg:flex lg:items-center lg:gap-2">
+        <Hospital className="h-6 w-6" />
+        <span className="font-semibold">MedDash</span>
+      </div>
+      <div className="relative ml-auto flex-1 md:grow-0">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Search..."
+          className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+        />
+      </div>
+      <UserMenu />
+    </header>
   );
 }

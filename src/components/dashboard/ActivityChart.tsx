@@ -26,11 +26,13 @@ export function ActivityChart({ stats }: ActivityChartProps) {
   }));
 
   return (
-    <Card className="mb-6">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Documentos Procesados - Noviembre 2024</CardTitle>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-base font-medium">
+          Documentos Procesados - Noviembre 2024
+        </CardTitle>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="bg-[#667eea] text-white hover:bg-[#667eea]/90">
+          <Button variant="default" size="sm">
             Diario
           </Button>
           <Button variant="outline" size="sm">
@@ -42,41 +44,51 @@ export function ActivityChart({ stats }: ActivityChartProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="h-[350px]">
+        <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="colorDocuments" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#667eea" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#667eea" stopOpacity={0} />
+                  <stop
+                    offset="5%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity={0.3}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
-              <XAxis 
-                dataKey="day" 
-                label={{ value: 'Día del mes', position: 'insideBottom', offset: -5 }}
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis
+                dataKey="day"
+                stroke="hsl(var(--muted-foreground))"
+                tickLine={false}
+                axisLine={false}
                 className="text-xs"
               />
-              <YAxis 
-                label={{ value: 'Cantidad de documentos', angle: -90, position: 'insideLeft' }}
+              <YAxis
+                stroke="hsl(var(--muted-foreground))"
+                tickLine={false}
+                axisLine={false}
                 className="text-xs"
               />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'white', 
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px',
-                  padding: '8px'
+              <Tooltip
+                cursor={false}
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--background))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: 'var(--radius)',
                 }}
-                formatter={(value: number) => [`${value} documentos`, 'Procesados']}
-                labelFormatter={(label) => `Día ${label}`}
+                labelClassName="text-sm"
               />
               <Area
                 type="monotone"
                 dataKey="documents"
-                stroke="#667eea"
-                strokeWidth={3}
-                fillOpacity={1}
+                stroke="hsl(var(--primary))"
+                strokeWidth={2}
                 fill="url(#colorDocuments)"
               />
             </AreaChart>
