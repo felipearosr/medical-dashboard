@@ -1,6 +1,7 @@
-// components/views/Documents.tsx
+'use client';
 
 import React, { useState, useMemo } from 'react';
+import { useData } from '@/hooks/useData';
 import { Document } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,14 +22,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Download, Search } from 'lucide-react';
+import { Download, Search, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-interface DocumentsProps {
-  documents: Document[];
-}
+export default function DocumentsPage() {
+  const { 
+    documents, 
+    loading, 
+    error, 
+    refetch,
+  } = useData();
 
-export function Documents({ documents }: DocumentsProps) {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [classFilter, setClassFilter] = useState('all');
@@ -36,17 +41,20 @@ export function Documents({ documents }: DocumentsProps) {
 
   // Get unique types and classifications
   const documentTypes = useMemo(() => {
+    if (!documents) return [];
     const types = new Set(documents.map(d => d.tipo_documento));
     return Array.from(types);
   }, [documents]);
 
   const classifications = useMemo(() => {
+    if (!documents) return [];
     const classes = new Set(documents.map(d => d.clasificacion));
     return Array.from(classes);
   }, [documents]);
 
   // Filter documents
   const filteredDocuments = useMemo(() => {
+    if (!documents) return [];
     return documents.filter(doc => {
       // Search filter
       if (search) {
@@ -111,6 +119,39 @@ export function Documents({ documents }: DocumentsProps) {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-[#667eea] mb-4" />
+          <p className="text-lg text-gray-600">Cargando documentos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Alert className="max-w-md">
+          <AlertTitle>Error al cargar datos</AlertTitle>
+          <AlertDescription className="mt-2">
+            {error.message}
+          </AlertDescription>
+          <Button 
+            onClick={refetch} 
+            className="mt-4"
+            variant="outline"
+          >
+            Reintentar
+          </Button>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -242,4 +283,4 @@ export function Documents({ documents }: DocumentsProps) {
       </div>
     </div>
   );
-}
+} 

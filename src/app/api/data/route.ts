@@ -1,16 +1,11 @@
-// lib/data.ts
+// app/api/data/route.ts
 
+import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { parseCSVData, calculateMonthlyStats, getRecentActivities as getRecentActivitiesFromProcessing } from '@/lib/data-processing';
-import { Document, MonthlyStats, Activity } from './types';
+import { parseCSVData, calculateMonthlyStats } from '@/lib/data-processing';
 
-interface DashboardData {
-  documents: Document[];
-  stats: MonthlyStats;
-}
-
-export async function loadData(): Promise<DashboardData> {
+export async function GET() {
   try {
     // Read CSV file from public directory
     const filePath = path.join(process.cwd(), 'public', 'data', 'selected1.csv');
@@ -21,10 +16,10 @@ export async function loadData(): Promise<DashboardData> {
     } catch {
       // Return mock data if file doesn't exist
       const mockStats = calculateMonthlyStats([]);
-      return {
+      return NextResponse.json({
         documents: [],
         stats: mockStats
-      };
+      });
     }
     
     // Read and parse CSV
@@ -32,22 +27,18 @@ export async function loadData(): Promise<DashboardData> {
     const documents = parseCSVData(csvContent);
     const stats = calculateMonthlyStats(documents);
     
-    return {
+    return NextResponse.json({
       documents,
       stats
-    };
+    });
   } catch (error) {
     console.error('Error loading data:', error);
     
     // Return default data on error
     const mockStats = calculateMonthlyStats([]);
-    return {
+    return NextResponse.json({
       documents: [],
       stats: mockStats
-    };
+    });
   }
 }
-
-export function getRecentActivities(): Activity[] {
-  return getRecentActivitiesFromProcessing();
-} 

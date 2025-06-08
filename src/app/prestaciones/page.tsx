@@ -1,9 +1,9 @@
-// components/views/Prestaciones.tsx
+'use client';
 
 import React, { useMemo } from 'react';
+import { useData } from '@/hooks/useData';
 import { Document, Prestacion } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import {
   BarChart,
   Bar,
@@ -15,16 +15,32 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend
 } from 'recharts';
+import { Loader2 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 
-interface PrestacionesProps {
-  documents: Document[];
-}
+export default function PrestacionesPage() {
+  const { 
+    documents, 
+    loading, 
+    error, 
+    refetch,
+  } = useData();
 
-export function Prestaciones({ documents }: PrestacionesProps) {
   // Calculate prestaciones statistics
   const stats = useMemo(() => {
+    if (!documents || documents.length === 0) {
+      return {
+        total: 0,
+        unique: 0,
+        avgPerDoc: 0,
+        avgScore: 0,
+        top10: [],
+        categories: [],
+      };
+    }
+    
     const allPrestaciones: Prestacion[] = [];
     const prestacionesByDoc: number[] = [];
     
@@ -99,41 +115,70 @@ export function Prestaciones({ documents }: PrestacionesProps) {
 
   const COLORS = ['#667eea', '#48bb78', '#ed8936', '#f56565', '#38b2ac', '#9f7aea'];
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-[#667eea] mb-4" />
+          <p className="text-lg text-gray-600">Cargando prestaciones...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Alert className="max-w-md">
+          <AlertTitle>Error al cargar datos</AlertTitle>
+          <AlertDescription className="mt-2">
+            {error.message}
+          </AlertDescription>
+          <Button 
+            onClick={refetch} 
+            className="mt-4"
+            variant="outline"
+          >
+            Reintentar
+          </Button>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold mb-6">💊 Análisis de Prestaciones</h2>
       
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="border-t-4 border-t-primary">
+        <Card className="border-t-4 border-primary">
           <CardContent className="p-6">
-            <p className="text-sm font-semibold text-gray-600 uppercase">Total Prestaciones</p>
+            <p className="text-sm font-semibold text-muted-foreground uppercase">Total Prestaciones</p>
             <p className="text-3xl font-bold mt-2">{stats.total.toLocaleString()}</p>
-            <p className="text-sm text-gray-500 mt-1">362 prestaciones este mes</p>
           </CardContent>
         </Card>
         
-        <Card className="border-t-4 border-t-success">
+        <Card className="border-t-4 border-green-500">
           <CardContent className="p-6">
-            <p className="text-sm font-semibold text-gray-600 uppercase">Prestaciones Únicas</p>
+            <p className="text-sm font-semibold text-muted-foreground uppercase">Prestaciones Únicas</p>
             <p className="text-3xl font-bold mt-2">{stats.unique}</p>
-            <p className="text-sm text-gray-500 mt-1">8 categorías principales</p>
           </CardContent>
         </Card>
         
-        <Card className="border-t-4 border-t-warning">
+        <Card className="border-t-4 border-yellow-500">
           <CardContent className="p-6">
-            <p className="text-sm font-semibold text-gray-600 uppercase">Promedio por Doc</p>
+            <p className="text-sm font-semibold text-muted-foreground uppercase">Promedio por Doc</p>
             <p className="text-3xl font-bold mt-2">{stats.avgPerDoc.toFixed(1)}</p>
-            <p className="text-sm text-gray-500 mt-1">Máx: 30 prestaciones</p>
           </CardContent>
         </Card>
         
-        <Card className="border-t-4 border-t-gray-400">
+        <Card className="border-t-4 border-gray-400">
           <CardContent className="p-6">
-            <p className="text-sm font-semibold text-gray-600 uppercase">Confianza Promedio</p>
+            <p className="text-sm font-semibold text-muted-foreground uppercase">Confianza Promedio</p>
             <p className="text-3xl font-bold mt-2">{(stats.avgScore * 100).toFixed(1)}%</p>
-            <p className="text-sm text-red-500 mt-1">15 con score &lt; 70%</p>
           </CardContent>
         </Card>
       </div>
@@ -149,7 +194,7 @@ export function Prestaciones({ documents }: PrestacionesProps) {
             <CardContent>
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.top10} layout="horizontal">
+                  <BarChart data={stats.top10} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" />
                     <YAxis dataKey="name" type="category" width={200} />
@@ -194,32 +239,6 @@ export function Prestaciones({ documents }: PrestacionesProps) {
           </Card>
         </div>
       </div>
-      
-      {/* Filters section placeholder */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filtros de Búsqueda</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="p-4 bg-gray-50 rounded text-center text-gray-500">
-              Período
-            </div>
-            <div className="p-4 bg-gray-50 rounded text-center text-gray-500">
-              Categoría
-            </div>
-            <div className="p-4 bg-gray-50 rounded text-center text-gray-500">
-              Confianza Mínima
-            </div>
-            <div className="p-4 bg-gray-50 rounded text-center text-gray-500">
-              Buscar Prestación
-            </div>
-            <div className="p-4 bg-gray-50 rounded text-center text-gray-500">
-              Aplicar Filtros
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
-}
+} 

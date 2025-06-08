@@ -1,5 +1,16 @@
-import { redirect } from 'next/navigation';
+// app/page.tsx
 
-export default function RootPage() {
-  redirect('/dashboard/overview');
-} 
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function HomePage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace('/overview');
+  }, [router]);
+
+  return null;
+}
